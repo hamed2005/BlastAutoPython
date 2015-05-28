@@ -4,33 +4,19 @@ import re
 from Bio.Blast import NCBIWWW
 from Bio import SeqIO
 
-spacersDir = "all-spacers-of-a-bacteria/"
 blastResultDir = "blast-results/"
 
-### How many files to process?
-nb_bacteria = len([name for name in os.listdir(spacersDir)])
-counter = 1
-
-### Running through all bacteria spacers one by one
-for fn in os.listdir(spacersDir):
+### Parsing and fetching all spacers from all-spacers.fasta
+fasta_records = (r for r in SeqIO.parse("all-spacers.fasta", "fasta"))
 	
-	### Tracking progress	
-	print "Bacteria %i of %i :\n" % (counter, nb_bacteria)
-	counter += 1
+### Running Blast for each spacer
+for r in fasta_records:
+	### Tracking progress
+	print "Blasting %s :\n" % (r.id)
+	result_handle = NCBIWWW.qblast("blastn", "nt", r.seq, expect = 0.001, megablast = "FALSE", filter = None, format_type = "Text", ncbi_gi = True, entrez_query = '(2157[taxid] OR 2[taxid] OR 10239[taxid])')
+	output_file = open(blastResultDir + r.id, 'w')
 	
-	#input_file = open(spacersDir+fn, 'r')
-	#record = SeqIO.read(spacersDir + fn, format = "fasta")
+	output_file.write(result_handle.read())
 	
-	### Parsing and fetching all spacers of a bacteria from multifasta file
-	fasta_records = (r for r in SeqIO.parse(spacersDir + fn, "fasta"))
-	
-	### Running Blat using qblast() for each spacer
-	for r in fasta_records:
-		print "Blasting %s :\n" % (r.id)
-		result_handle = NCBIWWW.qblast("blastn", "nt", r.seq)
-		output_file = open(blastResultDir + r.id, 'w')
-		
-		output_file.write(result_handle.read())
-		
-		output_file.close()
-		result_handle.close()
+	output_file.close()
+	result_handle.close()

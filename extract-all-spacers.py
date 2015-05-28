@@ -5,14 +5,14 @@ import re
 # pilerDir = file path of pilercr reports
 
 pilerDir = "crispr/"
-output = "all-spacers-of-a-bacteria/"
 spacers_regex = re.compile('(?<=\.\.\.    )\w+')
+file_out = open("all-spacers.fasta", 'w')
 
 ### How many files to process?
 number_of_files = len([name for name in os.listdir(pilerDir)])
 i = 1
 
-### Get 
+### Going trough all pilercr reports
 for fn in os.listdir(pilerDir):
     ### Tracking progress
     print "Extracting spacers: %i out of %i" % (i, number_of_files)
@@ -25,10 +25,9 @@ for fn in os.listdir(pilerDir):
     
     ### Creating output only if it has spacer(s)
     if spacers:
-		### removing ".txt" at the end
-		fn = fn.split('.')[0]
-		file_out = open(output + fn + "_spacers.fasta", 'w')    
-		j=0
+		### Removing ".txt" at the end
+		fn = fn.split('.txt')[0]    
+		j=1
     
 		### Write '>' in each line followed by a Spacer in the line next line
 		for spacer in spacers:
@@ -36,4 +35,4 @@ for fn in os.listdir(pilerDir):
 			file_out.writelines("%s\n" % (spacer))
 			j += 1
 
-		file_out.close()
+file_out.close()
