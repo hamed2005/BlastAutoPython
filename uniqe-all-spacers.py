@@ -2,19 +2,32 @@ import re
 from collections import Counter
 
 sequence_regex = re.compile('[(A|T|C|G)]+\n')
+refseq_regex = re.compile('\w\w_.*')
 all_spacers = open("all-spacers.fasta", 'r')
 all_spacers_uniq = open("all-spacers-uniq.fasta", 'w')
 all_spacers = all_spacers.read()
 
 ### Obtain all spacers
 spacers = re.findall(sequence_regex, all_spacers)
+ids = re.findall(refseq_regex, all_spacers)
 
-### Build a dictionary of all found spacers {spacer: occurance}
-uniq_spacers = Counter(spacers)
+
+### Build a dictionary of all found spacers {spacer: uniqe_key}
+#	uniq_key is the index to uniq_spacers_ids with all ids of a particular spacer
+uniq_spacers = {}
+uniq_spacers_ids = []
+i = 0
+while i<len(spacers):
+	if spacers[i] in uniq_spacers:
+		uniq_spacers_ids[uniq_spacers[spacers[i]]] += " | %s" % (ids[i])
+	else:
+		uniq_spacers_ids.append(">%s" % (ids[i]))
+		uniq_spacers[spacers[i]] = len(uniq_spacers_ids)-1
+	i += 1
 
 counter = 1
 for item in uniq_spacers:
-	all_spacers_uniq.writelines(">spacer_%i\n%s" % (counter, item))
+	all_spacers_uniq.writelines("%s\n%s" % (uniq_spacers_ids[uniq_spacers[item]], item))
 	counter += 1
 
 all_spacers_uniq.close()
