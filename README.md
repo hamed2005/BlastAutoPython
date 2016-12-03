@@ -1,3 +1,5 @@
+***This repo was integrated into the CRISPR-Exposed***
+
 # BlastAutoPython
 
 ## Introduction
